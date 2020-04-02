@@ -17,6 +17,23 @@ const request = async (query, variables = {}) => {
   return responseBody.data;
 };
 
+export const createJob = async input => {
+  const mutation = `mutation CreateJob($input: CreateJobInput) {
+    job: createJob(input: $input) {
+      id
+      title
+      description
+      company {
+        id
+        name
+        description
+      }
+    }
+  }`;
+  const { job } = await request(mutation, { input });
+  return job;
+};
+
 export const loadJobs = async () => {
   const query = `{
     jobs {
@@ -33,8 +50,7 @@ export const loadJobs = async () => {
 };
 
 export const loadJob = async id => {
-  const query = `
-    query JobQuery($id: ID!) {
+  const query = `query JobQuery($id: ID!) {
       job(id: $id) {
         id,
         title,
