@@ -51,17 +51,6 @@ export const loadJob = async id => {
   return job;
 };
 
-export const loadCompanies = async () => {
-  const query = `{
-    companies {
-      id
-      name
-    }
-  }`;
-  const { companies } = await request(query);
-  return companies;
-};
-
 export const loadCompany = async id => {
   const query = `
     query CompanyQuery($id: ID!) {
@@ -69,6 +58,10 @@ export const loadCompany = async id => {
         id
         name
         description
+        jobs {
+          id
+          title
+        }
       }
     }
   `;
