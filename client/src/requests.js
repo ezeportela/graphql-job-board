@@ -1,52 +1,77 @@
 const endpointURL = 'http://localhost:9000/api';
 
-const fetchData = async requestData => {
+const request = async (query, variables = {}) => {
   const response = await fetch(endpointURL, {
     method: 'POST',
     headers: {
       'content-type': 'application/json'
     },
-    body: JSON.stringify(requestData)
+    body: JSON.stringify({ query, variables })
   });
 
-  return await response.json();
+  const responseBody = await response.json();
+  if (responseBody.errors) {
+    const message = responseBody.errors.map(error => error.message).join('\n');
+    throw new Error(message);
+  }
+  return responseBody.data;
 };
 
 export const loadJobs = async () => {
-  const response = await fetchData({
-    query: `{
-      jobs {
+  const query = `{
+    jobs {
+      id
+      title
+      company {
         id
-        title
-        company {
-          id
-          name
-        }
+        name
       }
-    }`
-  });
-
-  return response.data.jobs;
+    }
+  }`;
+  const { jobs } = await request(query);
+  return jobs;
 };
 
 export const loadJob = async id => {
-  const response = await fetchData({
-    query: `
-      query JobQuery($id: ID!) {
-        job(id: $id) {
-          id,
-          title,
-          company {
-            id,
-            name,
-            description
-          }
+  const query = `
+    query JobQuery($id: ID!) {
+      job(id: $id) {
+        id,
+        title,
+        company {
+          id
+          name
           description
         }
+        description
       }
-    `,
-    variables: { id }
-  });
+    }
+  `;
+  const { job } = await request(query, { id });
+  return job;
+};
 
-  return response.data.job;
+export const loadCompanies = async () => {
+  const query = `{
+    companies {
+      id
+      name
+    }
+  }`;
+  const { companies } = await request(query);
+  return companies;
+};
+
+export const loadCompany = async id => {
+  const query = `
+    query CompanyQuery($id: ID!) {
+      company(id: $id) {
+        id
+        name
+        description
+      }
+    }
+  `;
+  const { company } = await request(query, { id });
+  return company;
 };
