@@ -4,7 +4,7 @@ import { loadCompany } from './requests';
 export class CompanyDetail extends Component {
   constructor(props) {
     super(props);
-    this.state = { company: {} };
+    this.state = { company: null };
   }
 
   async componentDidMount() {
@@ -15,6 +15,7 @@ export class CompanyDetail extends Component {
 
   render() {
     const { company } = this.state;
+    if (!company) return null;
     return (
       <div>
         <h1 className="title">{company.name}</h1>
