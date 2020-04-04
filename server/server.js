@@ -16,18 +16,19 @@ app.use(
   bodyParser.json(),
   expressJwt({
     secret: jwtSecret,
-    credentialsRequired: false
+    credentialsRequired: false,
   })
 );
 
 const typeDefs = gql(fs.readFileSync('./schema.graphql', { encoding: 'utf8' }));
 const resolvers = require('./resolvers');
-const apolloServer = new ApolloServer({ typeDefs, resolvers });
+const context = ({ req }) => ({ user: req.user });
+const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
 apolloServer.applyMiddleware({ app, path: '/api' });
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = db.users.list().find(user => user.email === email);
+  const user = db.users.list().find((user) => user.email === email);
   if (!(user && user.password === password)) {
     res.sendStatus(401);
     return;

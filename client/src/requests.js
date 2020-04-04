@@ -1,23 +1,30 @@
+import { getAccessToken, isLoggedIn } from './auth';
+
 const endpointURL = 'http://localhost:9000/api';
 
 const request = async (query, variables = {}) => {
-  const response = await fetch(endpointURL, {
+  const request = {
     method: 'POST',
     headers: {
-      'content-type': 'application/json'
+      'content-type': 'application/json',
     },
-    body: JSON.stringify({ query, variables })
-  });
-
+    body: JSON.stringify({ query, variables }),
+  };
+  if (isLoggedIn()) {
+    request.headers['authorization'] = `Bearer ${getAccessToken()}`;
+  }
+  const response = await fetch(endpointURL, request);
   const responseBody = await response.json();
   if (responseBody.errors) {
-    const message = responseBody.errors.map(error => error.message).join('\n');
+    const message = responseBody.errors
+      .map((error) => error.message)
+      .join('\n');
     throw new Error(message);
   }
   return responseBody.data;
 };
 
-export const createJob = async input => {
+export const createJob = async (input) => {
   const mutation = `mutation CreateJob($input: CreateJobInput) {
     job: createJob(input: $input) {
       id
@@ -49,7 +56,7 @@ export const loadJobs = async () => {
   return jobs;
 };
 
-export const loadJob = async id => {
+export const loadJob = async (id) => {
   const query = `query JobQuery($id: ID!) {
       job(id: $id) {
         id,
@@ -67,7 +74,7 @@ export const loadJob = async id => {
   return job;
 };
 
-export const loadCompany = async id => {
+export const loadCompany = async (id) => {
   const query = `
     query CompanyQuery($id: ID!) {
       company(id: $id) {
