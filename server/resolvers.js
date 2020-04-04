@@ -7,11 +7,12 @@ const Query = {
 };
 
 const Mutation = {
-  createJob: (root, { input }, { user }) => {
+  createJob: async (root, { input }, { user }) => {
     if (!user) {
       throw new Error('Unauthorized');
     }
-    const id = db.jobs.create(input);
+    const userData = db.users.get(user.sub);
+    const id = db.jobs.create({ ...input, companyId: userData.companyId });
     return db.jobs.get(id);
   },
 };
